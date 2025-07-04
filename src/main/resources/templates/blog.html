@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Gốm Concept | Chia sẻ nghệ thuật gốm sứ</title>
+    <meta name="description" content="Khám phá câu chuyện, kinh nghiệm và cảm hứng về nghệ thuật gốm sứ từ Gốm Concept">
+    
+    <link rel="stylesheet" th:href="@{/css/blog.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Lora:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body data-page="blog">
+    
+    <!-- Header -->
+    <header class="blog-header">
+        <div class="header-container">
+            <div class="header-content">
+                <h1><i class="fas fa-feather-alt"></i> Blog Gốm Concept</h1>
+                <p>Chia sẻ những câu chuyện, cảm hứng và kinh nghiệm về nghệ thuật gốm sứ</p>
+            </div>
+            
+            <div class="header-social">
+                <a href="https://facebook.com/gomconcept98" target="_blank" class="social-link facebook">
+                    <i class="fab fa-facebook-f"></i>
+                    <span>Theo dõi Facebook</span>
+                </a>
+                <a href="https://instagram.com/gomconcept98" target="_blank" class="social-link instagram">
+                    <i class="fab fa-instagram"></i>
+                    <span>Theo dõi Instagram</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="blog-main">
+        <div class="blog-container">
+            
+            <!-- Filter & Search -->
+            <div class="blog-filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm bài viết..." onkeyup="filterPosts()">
+                </div>
+                
+                <div class="filter-tags">
+                    <button class="tag-filter active" data-tag="all">Tất cả</button>
+                    <button class="tag-filter" data-tag="tutorial">Hướng dẫn</button>
+                    <button class="tag-filter" data-tag="inspiration">Cảm hứng</button>
+                    <button class="tag-filter" data-tag="behind-scenes">Hậu trường</button>
+                    <button class="tag-filter" data-tag="product">Sản phẩm mới</button>
+                    <button class="tag-filter" data-tag="workshop">Workshop</button>
+                </div>
+            </div>
+
+            <!-- Blog Posts Grid -->
+            <div class="blog-grid" id="blogGrid">
+                
+                <!-- Sample Facebook-synced posts -->
+                <article class="blog-post" th:each="post : ${blogPosts}" th:data-tags="${post.tags}">
+                    <div class="post-header">
+                        <div class="post-source">
+                            <i class="fab fa-facebook" th:if="${post.source == 'facebook'}"></i>
+                            <i class="fab fa-instagram" th:if="${post.source == 'instagram'}"></i>
+                            <span th:text="${post.source == 'facebook' ? 'Từ Facebook' : 'Từ Instagram'}">Từ Facebook</span>
+                        </div>
+                        <div class="post-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">25/12/2024 14:30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="post-content">
+                        <!-- Post Image/Video -->
+                        <div class="post-media" th:if="${post.mediaUrl != null}">
+                            <div th:if="${post.mediaType == 'image'}" class="post-image">
+                                <img th:src="${post.mediaUrl}" th:alt="${post.title}" loading="lazy">
+                                <div class="media-overlay">
+                                    <button class="view-fullsize" onclick="openImageModal(this)">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div th:if="${post.mediaType == 'video'}" class="post-video">
+                                <video controls th:poster="${post.thumbnailUrl}">
+                                    <source th:src="${post.mediaUrl}" type="video/mp4">
+                                    Trình duyệt của bạn không hỗ trợ video.
+                                </video>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Text -->
+                        <div class="post-text">
+                            <h2 th:text="${post.title}">Quy trình tạo ra một chiếc chậu gốm hoàn hảo</h2>
+                            <div class="post-excerpt" th:utext="${post.excerpt}">
+                                Hôm nay mình muốn chia sẻ với các bạn quy trình tạo ra một chiếc chậu gốm từ khối đất sét thô đến sản phẩm hoàn thiện. Mỗi bước đều cần sự tỉ mỉ và kiên nhẫn...
+                            </div>
+                            
+                            <!-- Tags -->
+                            <div class="post-tags" th:if="${post.tags != null and !post.tags.empty}">
+                                <span th:each="tag : ${post.tags}" class="tag" th:text="'#' + ${tag}">#tutorial</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="post-footer">
+                        <div class="post-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-heart"></i>
+                                <span th:text="${post.likes}">45</span>
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-comment"></i>
+                                <span th:text="${post.comments}">12</span>
+                            </span>
+                            <span class="stat-item">
+                                <i class="fas fa-share"></i>
+                                <span th:text="${post.shares}">8</span>
+                            </span>
+                        </div>
+                        
+                        <div class="post-actions">
+                            <a th:href="${post.originalUrl}" target="_blank" class="btn-action primary">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Xem trên Facebook</span>
+                            </a>
+                            <button class="btn-action secondary" onclick="sharePost(this)" th:data-url="${post.originalUrl}">
+                                <i class="fas fa-share-alt"></i>
+                                <span>Chia sẻ</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Featured Post Template (for manual posts) -->
+                <article class="blog-post featured" th:if="${featuredPost != null}">
+                    <div class="featured-badge">
+                        <i class="fas fa-star"></i>
+                        <span>Bài viết nổi bật</span>
+                    </div>
+                    
+                    <div class="post-header">
+                        <div class="post-source">
+                            <i class="fas fa-edit"></i>
+                            <span>Bài viết gốc</span>
+                        </div>
+                        <div class="post-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span th:text="${#temporals.format(featuredPost.createdAt, 'dd/MM/yyyy')}">20/12/2024</span>
+                        </div>
+                    </div>
+                    
+                    <div class="post-content">
+                        <div class="post-media" th:if="${featuredPost.imageUrl != null}">
+                            <div class="post-image">
+                                <img th:src="${featuredPost.imageUrl}" th:alt="${featuredPost.title}">
+                            </div>
+                        </div>
+                        
+                        <div class="post-text">
+                            <h2 th:text="${featuredPost.title}">Câu chuyện về nghệ thuật gốm sứ</h2>
+                            <div class="post-excerpt" th:utext="${featuredPost.content}">
+                                Nghệ thuật gốm sứ không chỉ là việc tạo hình từ đất sét, mà còn là cách chúng ta gửi gắm tâm hồn, cảm xúc vào từng sản phẩm...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="post-footer">
+                        <div class="post-actions">
+                            <a th:href="@{'/blog/' + ${featuredPost.slug}}" class="btn-action primary">
+                                <i class="fas fa-book-open"></i>
+                                <span>Đọc tiếp</span>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+                
+            </div>
+
+            <!-- Load More -->
+            <div class="load-more-container" th:if="${hasMorePosts}">
+                <button class="btn-load-more" onclick="loadMorePosts()">
+                    <i class="fas fa-plus"></i>
+                    <span>Xem thêm bài viết</span>
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Không tìm thấy bài viết</h3>
+                <p>Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc khác.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Newsletter Subscription -->
+    <section class="newsletter-section">
+        <div class="newsletter-container">
+            <div class="newsletter-content">
+                <h3><i class="fas fa-envelope"></i> Đăng ký nhận thông báo</h3>
+                <p>Nhận thông báo về những bài viết mới và chia sẻ từ Gốm Concept</p>
+            </div>
+            <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+                <input type="email" placeholder="Nhập email của bạn..." required>
+                <button type="submit">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Đăng ký</span>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal image-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeImageModal()">&times;</button>
+            <img id="modalImage" src="" alt="">
+            <div class="modal-caption">
+                <p id="modalCaption"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/blog.js}"></script>
+</body>
+</html>

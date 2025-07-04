@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.tenSanPham} + ' - Chi tiết sản phẩm'">Chi tiết sản phẩm</title>
+    <link rel="stylesheet" th:href="@{/css/product_detail.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Lora:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <div th:replace="fragments/scripts :: scripts"></div>
+</head>
+<body data-page="product-detail">
+    
+    <!-- Hidden data for JavaScript -->
+    <div id="productData" style="display: none;"
+         th:data-id="${product.maSanPham}"
+         th:data-name="${product.tenSanPham}"
+         th:data-slug="${product.slug}"
+         th:data-description="${product.moTa}"
+         th:data-main-image="${product.hinhAnhHienThi}"
+         th:data-image2="${product.hinhAnh2}"
+         th:data-image3="${product.hinhAnh3}"
+         th:data-image4="${product.hinhAnh4}">
+    </div>
+
+    <!-- Product Details Data -->
+    <div id="productDetailsData" style="display: none;">
+        <div th:each="detail, detailStat : ${productDetails}" 
+             class="product-detail-item"
+             th:data-id="${detail.maChiTiet}"
+             th:data-size="${detail.kichThuoc}"
+             th:data-price="${detail.giaTien}"
+             th:data-height="${detail.chieuCao}"
+             th:data-width="${detail.chieuRong}"
+             th:data-stock="${detail.soLuongTrongKho}">
+        </div>
+    </div>
+
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="product-detail-container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+            <a href="/" class="breadcrumb-item">
+                <i class="fas fa-home"></i> Trang chủ
+            </a>
+            <span class="breadcrumb-separator">></span>
+            <a href="/products" class="breadcrumb-item">Sản phẩm</a>
+            <span class="breadcrumb-separator">></span>
+            <span class="breadcrumb-item active" th:text="${product.tenSanPham}">Tên sản phẩm</span>
+        </nav>
+
+        <div class="product-detail-content">
+            <!-- Product Images -->
+            <div class="product-images">
+                <!-- Thumbnail Images - Left Side -->
+                <div class="thumbnail-images">
+                    <div class="thumbnail-wrapper">
+                        <img class="thumbnail active" 
+                             th:src="${product.hinhAnhHienThi != null and !product.hinhAnhHienThi.empty ? product.hinhAnhHienThi : '/images/default-product.jpg'}"
+                             th:alt="${product.tenSanPham} + ' - Hình 1'"
+                             data-action="change-image"
+                             tabindex="0">
+                    </div>
+                    
+                    <div class="thumbnail-wrapper" th:if="${product.hinhAnh2 != null and !product.hinhAnh2.empty}">
+                        <img class="thumbnail" 
+                             th:src="${product.hinhAnh2}"
+                             th:alt="${product.tenSanPham} + ' - Hình 2'"
+                             data-action="change-image"
+                             tabindex="0">
+                    </div>
+                    
+                    <div class="thumbnail-wrapper" th:if="${product.hinhAnh3 != null and !product.hinhAnh3.empty}">
+                        <img class="thumbnail" 
+                             th:src="${product.hinhAnh3}"
+                             th:alt="${product.tenSanPham} + ' - Hình 3'"
+                             data-action="change-image"
+                             tabindex="0">
+                    </div>
+                    
+                    <div class="thumbnail-wrapper" th:if="${product.hinhAnh4 != null and !product.hinhAnh4.empty}">
+                        <img class="thumbnail" 
+                             th:src="${product.hinhAnh4}"
+                             th:alt="${product.tenSanPham} + ' - Hình 4'"
+                             data-action="change-image"
+                             tabindex="0">
+                    </div>
+                </div>
+
+                <!-- Main Image -->
+                <div class="main-image">
+                    <img id="mainImage" 
+                         th:src="${product.hinhAnhHienThi != null and !product.hinhAnhHienThi.empty ? product.hinhAnhHienThi : '/images/default-product.jpg'}" 
+                         th:alt="${product.tenSanPham}">
+                    
+                    <div th:if="${product.tinhTrang}" class="product-badge out-of-stock">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Hết hàng
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <div class="product-header">
+                    <h1 class="product-title" th:text="${product.tenSanPham}">Tên sản phẩm</h1>
+                    <div class="handcrafted-badge">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        <span>Thủ công truyền thống</span>
+                    </div>
+                </div>
+                
+                <!-- Product Description -->
+                <div class="product-description">
+                    <h3><i class="fas fa-feather-alt"></i> Mô tả sản phẩm</h3>
+                    <p th:text="${product.moTa != null and !product.moTa.empty ? product.moTa : 'Sản phẩm gốm thủ công cao cấp, được làm bằng tay với chất liệu gốm tự nhiên. Thiết kế tinh xảo, mang đậm dấu ấn cá nhân của nghệ nhân, phù hợp để trang trí nhà cửa hoặc làm quà tặng ý nghĩa.'}">
+                        Mô tả sản phẩm
+                    </p>
+                </div>
+
+                <!-- Size Selection -->
+                <div class="size-selection" th:if="${productDetails != null and !productDetails.empty}">
+                    <h3><i class="fas fa-rulers"></i> Chọn kích thước</h3>
+                    <div class="size-options">
+                        <div th:each="detail, iterStat : ${productDetails}" 
+                             class="size-option"
+                             th:classappend="${detail.soLuongTrongKho == 0 ? ' out-of-stock' : ''}"
+                             th:data-size="${detail.kichThuoc}"
+                             th:data-price="${detail.giaTien}"
+                             th:data-height="${detail.chieuCao}"
+                             th:data-width="${detail.chieuRong}"
+                             th:data-stock="${detail.soLuongTrongKho}"
+                             data-action="select-size">
+                            
+                            <input type="radio" name="size" 
+                                   th:value="${detail.kichThuoc}" 
+                                   th:id="'size-' + ${detail.kichThuoc}" 
+                                   th:checked="${iterStat.first and detail.soLuongTrongKho > 0}"
+                                   th:disabled="${detail.soLuongTrongKho == 0}">
+                            
+                            <label th:for="'size-' + ${detail.kichThuoc}" class="size-label">
+                                <div class="size-info">
+                                    <span class="size-name" th:text="'Size ' + ${detail.kichThuoc}">Size</span>
+                                    <span class="size-dimensions" th:text="'(' + ${detail.chieuCao} + ' × ' + ${detail.chieuRong} + ' cm)'">
+                                        (20×15 cm)
+                                    </span>
+                                </div>
+                                <div class="size-price-status">
+                                    <span class="size-price" th:text="${#numbers.formatDecimal(detail.giaTien, 1, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                                    <span th:if="${detail.soLuongTrongKho > 0}" class="size-status in-stock">
+                                        <i class="fas fa-check-circle"></i> Còn hàng
+                                    </span>
+                                    <span th:if="${detail.soLuongTrongKho == 0}" class="size-status out-of-stock">
+                                        <i class="fas fa-times-circle"></i> Hết hàng
+                                    </span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Size Available -->
+                <div class="no-size-message" th:if="${productDetails == null or productDetails.empty}">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Sản phẩm này hiện tại chưa có thông tin kích thước. Vui lòng liên hệ để biết thêm chi tiết.</p>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="contact-info">
+                    <h3><i class="fas fa-phone-alt"></i> Liên hệ đặt hàng</h3>
+                    <div class="contact-methods">
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>Hotline: <a>0345034586</a></span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email: <a>gomconcept98@gmail.com</a></span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fab fa-facebook"></i>
+                            <span>Facebook: <a href="https://facebook.com/gomconcept98" target="_blank">Gốm Concept</a></span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fab fa-instagram"></i>
+                            <span>Instagram: <a href="https://instagram.com/gomconcept98" target="_blank">@gomconcept</a></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-primary" data-action="contact-order" title="Liên hệ đặt hàng ngay">
+                        <i class="fas fa-phone-alt"></i>
+                        Liên hệ đặt hàng
+                    </button>
+                    
+                    <button class="btn btn-secondary" data-action="share-product" title="Chia sẻ sản phẩm">
+                        <i class="fas fa-share-alt"></i>
+                        Chia sẻ sản phẩm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <div class="related-products" th:if="${relatedProducts != null and !relatedProducts.empty}">
+            <h2><i class="fas fa-heart"></i> Sản phẩm liên quan</h2>
+            <div class="related-products-grid">
+                <div th:each="related : ${relatedProducts}" class="related-product-card">
+                    <a th:href="@{/products/{slug}(slug=${related.slug})}" th:title="${related.tenSanPham}">
+                        <div class="product-image">
+                            <img th:src="${related.hinhAnhHienThi != null and !related.hinhAnhHienThi.empty ? related.hinhAnhHienThi : '/images/default-product.jpg'}" 
+                                 th:alt="${related.tenSanPham}"
+                                 onerror="this.src='/images/default-product.jpg';"
+                                 loading="lazy">
+                        </div>
+                        <div class="product-content">
+                            <h4 th:text="${related.tenSanPham}">Tên sản phẩm</h4>
+                            <p class="price">
+                                <i class="fas fa-tag"></i>
+                                Liên hệ
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/product_detail.js}"></script>
+</body>
+</html>

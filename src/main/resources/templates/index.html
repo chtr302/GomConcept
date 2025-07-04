@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gốm Concept</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <div th:replace="fragments/scripts :: scripts"></div>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="fragments/navbar :: navbar"></div>    
+    <!-- Nội dung chính -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-image">
+                <img th:src="@{/img/hero-section.jpg}" alt="Gốm nghệ thuật" class="hero-bg">
+            </div>
+            <div class="hero-text">
+                <h1>Gốm Concept</h1>
+                <p>Không chỉ là để trang trí. Mà đó còn là phong cách sống của bạn.</p>
+                <a href="/products" class="cta-button">Xem sản phẩm</a>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <section class="about-section">
+            <div class="about-text">
+                <h2>Về chúng mình</h2>
+                <p>Gốm Concept được sinh ra từ niềm đam mê với nghệ thuật gốm sứ và mong muốn mang đến những sản phẩm tinh tế, chất lượng cao cho không gian sống hiện đại.</p>
+                <p>Chúng tôi tin rằng mỗi món đồ gốm không chỉ đơn thuần là vật dụng, mà còn là cách thể hiện phong cách và cá tính riêng của bạn.</p>
+                <a href="/about" class="cta-button-outline">Tìm hiểu thêm</a>
+            </div>
+            <div class="about-image">
+                <img src="https://scontent.fsgn2-11.fna.fbcdn.net/v/t39.30808-6/497854261_122113946804844036_4358883465809098910_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=BzwuLA6XjG4Q7kNvwFdMJKF&_nc_oc=AdnzV9KpqGw4ihw3kzDb2961pAQpMYMLiUWb3Rzlt5oDwYwnKFdYoD66vMrsa6F5HmrkTxOcAphJUvuk924D3Jhb&_nc_zt=23&_nc_ht=scontent.fsgn2-11.fna&_nc_gid=EdxRlReN0e7YXFH0DdTEHg&oh=00_AfPQMQ9v4q4_SRjXW06hSA7Fj5kuduA7ijY98IKmpg4ZGg&oe=686B1E4F" alt="Về chúng tôi" class="about-bg">
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section class="products-section">
+            <div class="products-container">
+                <div class="products-header">
+                    <h2>Các bình gốm phổ biến</h2>
+                    <p>Khám phá bộ sưu tập những sản phẩm gốm được yêu thích nhất</p>
+                </div>
+                
+                <div class="products-grid">
+                    <!-- Product 1 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img th:src="@{/img/product-1.jpg}" alt="Bình gốm phong cách hiện đại" class="product-img">
+                            <div class="product-overlay">
+                                <a href="#" class="product-link">Xem chi tiết</a>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">Bình gốm phong cách hiện đại</h3>
+                            <p class="product-price">850.000₫</p>
+                        </div>
+                    </div>
+
+                    <!-- Product 2 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img th:src="@{/img/product-2.jpg}" alt="Bình gốm truyền thống" class="product-img">
+                            <div class="product-overlay">
+                                <a href="#" class="product-link">Xem chi tiết</a>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">Bình gốm truyền thống</h3>
+                            <p class="product-price">650.000₫</p>
+                        </div>
+                    </div>
+
+                    <!-- Product 3 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img th:src="@{/img/product-3.jpg}" alt="Bình gốm nghệ thuật" class="product-img">
+                            <div class="product-overlay">
+                                <a href="#" class="product-link">Xem chi tiết</a>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">Bình gốm nghệ thuật</h3>
+                            <p class="product-price">1.200.000₫</p>
+                        </div>
+                    </div>
+
+                    <!-- Product 4 -->
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img th:src="@{/img/product-4.jpg}" alt="Bình gốm tối giản" class="product-img">
+                            <div class="product-overlay">
+                                <a href="#" class="product-link">Xem chi tiết</a>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">Bình gốm tối giản</h3>
+                            <p class="product-price">750.000₫</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="products-footer">
+                    <a href="/products" class="cta-button">Xem tất cả sản phẩm</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <div th:replace="fragments/navbar :: auth-widgets"></div>
+</body>
+</html>

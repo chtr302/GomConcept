@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <div th:replace="fragments/scripts :: scripts"></div>
+</head>
+<body>
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="products-container">
+        <aside class="filters-sidebar">
+            <h3>Bộ lọc sản phẩm</h3>
+            
+            <div class="filter-section">
+                <h4>Loại sản phẩm</h4>
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="checkbox" value="all" checked>
+                        <span>Tất cả</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" value="bowls">
+                        <span>Bát đĩa</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" value="vases">
+                        <span>Lọ hoa</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" value="cups">
+                        <span>Cốc chén</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" value="plates">
+                        <span>Đĩa trang trí</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h4>Sắp xếp theo</h4>
+                <select id="sortOptions" class="sort-select" onchange="handleSortChange()">
+                    <option value="maSanPham-desc" th:selected="${sortBy == 'maSanPham' and sortDir == 'desc'}">Mới nhất</option>
+                    <option value="maSanPham-asc" th:selected="${sortBy == 'maSanPham' and sortDir == 'asc'}">Cũ nhất</option>
+                    <option value="giaTienCoBan-asc" th:selected="${sortBy == 'giaTienCoBan' and sortDir == 'asc'}">Giá thấp đến cao</option>
+                    <option value="giaTienCoBan-desc" th:selected="${sortBy == 'giaTienCoBan' and sortDir == 'desc'}">Giá cao đến thấp</option>
+                    <option value="tenSanPham-asc" th:selected="${sortBy == 'tenSanPham' and sortDir == 'asc'}">Tên A-Z</option>
+                    <option value="tenSanPham-desc" th:selected="${sortBy == 'tenSanPham' and sortDir == 'desc'}">Tên Z-A</option>
+                </select>
+            </div>
+
+            <button class="clear-filters-btn">
+                Xóa bộ lọc
+            </button>
+        </aside>
+
+        <main class="products-main">
+            <div class="products-header">
+                <h1>Sản phẩm chúng mình bán</h1>
+            </div>
+
+            <!-- Products Grid Container -->
+            <div class="products-grid" id="productsGrid">
+                <div th:if="${products != null and !products.empty}">
+                    <div th:each="product : ${products}" 
+                        th:class="${!product.tinhTrang ? 'product-card' : 'product-card out-of-stock'}">
+                        
+                        <!-- Link bao quanh toàn bộ card -->
+                        <a th:href="@{/products/{slug}(slug=${product.slug})}" 
+                        class="product-link" 
+                        th:title="'Xem chi tiết ' + ${product.tenSanPham}">
+                        
+                            <div class="product-image">
+                                <img th:src="${product.hinhAnhHienThi != null and !product.hinhAnhHienThi.empty ? product.hinhAnhHienThi : '/images/default-product.jpg'}" 
+                                    th:alt="${product.tenSanPham}" 
+                                    loading="lazy"
+                                    onerror="this.src='/images/default-product.jpg'; this.onerror=null;">
+
+                                <div th:if="${product.tinhTrang}" class="product-badge out-of-stock">
+                                    Hết hàng
+                                </div>
+                            </div>
+                            
+                            <div class="product-info">
+                                <h3 class="product-name" th:text="${product.tenSanPham}">Tên sản phẩm</h3>
+                                <div class="product-price">
+                                    <span class="current-price" 
+                                        th:text="${#numbers.formatDecimal(product.giaTienCoBan, 1, 'COMMA', 0, 'POINT')} + '₫'">
+                                        0₫
+                                    </span>
+                                </div>
+                                
+                                <!-- Thêm nút xem chi tiết -->
+                                <div class="product-actions">
+                                    <span class="view-details-btn">
+                                        <i class="fas fa-eye"></i>
+                                        Xem chi tiết
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <div th:if="${products == null or products.empty}" class="no-products">
+                    <div class="no-products-message">
+                        <h3>Không có sản phẩm nào</h3>
+                        <p>Hiện tại chưa có sản phẩm nào trong cửa hàng.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${totalPages > 1}" class="pagination">
+                <!-- Nút Previous -->
+                <a th:if="${currentPage > 0}" 
+                th:href="@{/products(page=${currentPage-1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                class="page-btn prev">
+                    ← Trang trước
+                </a>
+                <button th:if="${currentPage == 0}" class="page-btn prev" disabled>
+                    ← Trang trước
+                </button>
+                
+                <div class="page-numbers">
+                    <a th:if="${currentPage > 2}" 
+                    th:href="@{/products(page=0, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                    class="page-number">1</a>
+                    
+                    <span th:if="${currentPage > 3}" class="page-dots">...</span>
+
+                    <th:block th:each="i : ${#numbers.sequence(
+                        T(java.lang.Math).max(0, currentPage - 2), 
+                        T(java.lang.Math).min(totalPages - 1, currentPage + 2)
+                    )}">
+                        <a th:if="${i != currentPage}" 
+                        th:href="@{/products(page=${i}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                        th:text="${i + 1}"
+                        class="page-number"></a>
+                        
+                        <span th:if="${i == currentPage}" 
+                            th:text="${i + 1}"
+                            class="page-number active"></span>
+                    </th:block>
+
+                    <span th:if="${currentPage < totalPages - 4}" class="page-dots">...</span>
+
+                    <a th:if="${currentPage < totalPages - 3}" 
+                    th:href="@{/products(page=${totalPages-1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                    th:text="${totalPages}"
+                    class="page-number"></a>
+                </div>
+
+                <a th:if="${currentPage < totalPages - 1}" 
+                th:href="@{/products(page=${currentPage+1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
+                class="page-btn next">
+                    Trang sau →
+                </a>
+                <button th:if="${currentPage == totalPages - 1}" class="page-btn next" disabled>
+                    Trang sau →
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <button class="mobile-filter-toggle" id="mobileFilterToggle">
+        Bộ lọc
+    </button>
+
+    <div th:replace="fragments/footer :: footer"></div>
+    <div th:replace="fragments/navbar :: auth-widgets"></div>
+    <script>
+        function handleSortChange() {
+            const sortSelect = document.getElementById('sortOptions');
+            const sortValue = sortSelect.value;
+            const [sortBy, sortDir] = sortValue.split('-');
+            
+            // Redirect với parameters mới
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('sortBy', sortBy);
+            currentUrl.searchParams.set('sortDir', sortDir);
+            currentUrl.searchParams.set('page', '0'); // Reset về trang đầu
+            
+            window.location.href = currentUrl.toString();
+        }
+    </script>
+    <script th:src="@{/js/products.js}"></script>
+</body>
+</html>

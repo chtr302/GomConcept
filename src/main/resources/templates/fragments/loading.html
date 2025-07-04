@@ -1,0 +1,47 @@
+/* filepath: /Users/conghau/H/GomConcept/gomconcept/src/main/resources/templates/fragments/loading.html */
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Loading Screen -->
+    <div th:fragment="loading" id="loading-screen" class="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease;">
+        <div class="loading-container">
+            <div class="loading-logo">
+                <img th:src="@{/img/logo.jpg}" alt="Gốm Concept" class="loading-logo-img" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px;">
+            </div>
+            <div class="loading-spinner">
+                <div class="spinner" style="width: 40px; height: 40px; border: 3px solid rgba(76, 53, 35, 0.1); border-top: 3px solid #4c3523; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            </div>
+            <div class="loading-text">
+                <h3>Gốm Concept</h3>
+                <p>Đang tải...</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+    </style>
+
+    <script>
+        window.addEventListener('load', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

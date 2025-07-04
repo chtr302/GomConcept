@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sản phẩm - Gốm Concept</title>
+    <link rel="stylesheet" th:href="@{/css/admin/product_management.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Lora:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body data-page="product-management">
+    
+    <!-- Admin Navbar -->
+    <nav class="admin-navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-vase-plant"></i>
+                <span>Gốm Concept Admin</span>
+            </div>
+            
+            <div class="navbar-menu">
+                <a href="/admin/dashboard" class="nav-item">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="/admin/products" class="nav-item active">
+                    <i class="fas fa-box"></i> Sản phẩm
+                </a>
+                <a href="/admin/orders" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i> Đơn hàng
+                </a>
+                <a href="/admin/users" class="nav-item">
+                    <i class="fas fa-users"></i> Người dùng
+                </a>
+            </div>
+            
+            <div class="navbar-user">
+                <span sec:authentication="name">Admin</span>
+                <a href="/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="header-content">
+                <h1><i class="fas fa-box"></i> Quản lý sản phẩm</h1>
+                <p>Thêm, sửa, xóa và quản lý tất cả sản phẩm gốm</p>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> Thêm sản phẩm mới
+                </button>
+                <button class="btn btn-secondary" onclick="exportProducts()">
+                    <i class="fas fa-download"></i> Xuất Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="filter-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm..." onkeyup="filterProducts()">
+            </div>
+            
+            <div class="filter-controls">
+                <select id="categoryFilter" onchange="filterProducts()">
+                    <option value="">Tất cả danh mục</option>
+                    <option value="chau-cay">Chậu cây</option>
+                    <option value="binh-hoa">Bình hoa</option>
+                    <option value="trang-tri">Trang trí</option>
+                </select>
+                
+                <select id="statusFilter" onchange="filterProducts()">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="active">Còn hàng</option>
+                    <option value="out-of-stock">Hết hàng</option>
+                </select>
+                
+                <button class="btn btn-outline" onclick="resetFilters()">
+                    <i class="fas fa-refresh"></i> Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="table-container">
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                        </th>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Kích thước</th>
+                        <th>Giá</th>
+                        <th>Kho</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <!-- Sample data - sẽ được replace bằng Thymeleaf -->
+                    <tr th:each="product : ${products}" class="product-row" th:data-id="${product.maSanPham}">
+                        <td>
+                            <input type="checkbox" class="product-checkbox" th:value="${product.maSanPham}">
+                        </td>
+                        <td>
+                            <div class="product-image">
+                                <img th:src="${product.hinhAnhHienThi != null ? product.hinhAnhHienThi : '/images/default-product.jpg'}" 
+                                     th:alt="${product.tenSanPham}"
+                                     onerror="this.src='/images/default-product.jpg';">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="product-info">
+                                <h4 th:text="${product.tenSanPham}">Tên sản phẩm</h4>
+                                <p th:text="${product.slug}">product-slug</p>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="category-badge" th:text="${product.danhMuc != null ? product.danhMuc.tenDanhMuc : 'Chưa phân loại'}">
+                                Danh mục
+                            </span>
+                        </td>
+                        <td>
+                            <div class="size-info">
+                                <span th:if="${product.productDetails != null and !product.productDetails.empty}" 
+                                      th:text="${#lists.size(product.productDetails)} + ' size'">
+                                    3 size
+                                </span>
+                                <span th:if="${product.productDetails == null or product.productDetails.empty}" 
+                                      class="text-muted">
+                                    Chưa có size
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="price-info">
+                                <span th:if="${product.productDetails != null and !product.productDetails.empty}">
+                                    <span th:text="${#numbers.formatDecimal(product.productDetails[0].giaTien, 1, 'COMMA', 0, 'POINT')} + '₫'">
+                                        500,000₫
+                                    </span>
+                                    <small th:if="${#lists.size(product.productDetails) > 1}">
+                                        +<span th:text="${#lists.size(product.productDetails) - 1}">2</span> khác
+                                    </small>
+                                </span>
+                                <span th:if="${product.productDetails == null or product.productDetails.empty}" 
+                                      class="text-muted">
+                                    Chưa có giá
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stock-info">
+                                <span th:if="${product.productDetails != null and !product.productDetails.empty}">
+                                    <span th:text="${product.productDetails.![soLuongTrongKho].sum()}">25</span> sp
+                                </span>
+                                <span th:if="${product.productDetails == null or product.productDetails.empty}" 
+                                      class="text-muted">
+                                    0 sp
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:if="${product.tinhTrang == false}" class="status-badge status-active">
+                                <i class="fas fa-check-circle"></i> Còn hàng
+                            </span>
+                            <span th:if="${product.tinhTrang == true}" class="status-badge status-inactive">
+                                <i class="fas fa-times-circle"></i> Hết hàng
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-view" th:onclick="'viewProduct(' + ${product.maSanPham} + ')'" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-icon btn-edit" th:onclick="'editProduct(' + ${product.maSanPham} + ')'" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" th:onclick="'deleteProduct(' + ${product.maSanPham} + ')'" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions" id="bulkActions" style="display: none;">
+            <div class="selected-count">
+                <span id="selectedCount">0</span> sản phẩm được chọn
+            </div>
+            <div class="bulk-buttons">
+                <button class="btn btn-warning" onclick="bulkUpdateStatus('active')">
+                    <i class="fas fa-check"></i> Kích hoạt
+                </button>
+                <button class="btn btn-secondary" onclick="bulkUpdateStatus('inactive')">
+                    <i class="fas fa-pause"></i> Tạm dừng
+                </button>
+                <button class="btn btn-danger" onclick="bulkDelete()">
+                    <i class="fas fa-trash"></i> Xóa
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Hiển thị <span th:text="${#lists.size(products)}">10</span> trên tổng số <span th:text="${totalProducts}">50</span> sản phẩm
+            </div>
+            <div class="pagination">
+                <a href="#" class="page-btn" th:if="${currentPage > 0}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span class="page-current" th:text="${currentPage + 1}">1</span>
+                <span class="page-separator">/</span>
+                <span class="page-total" th:text="${totalPages}">5</span>
+                <a href="#" class="page-btn" th:if="${currentPage < totalPages - 1}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Thêm sản phẩm mới</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <form id="productForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <!-- Thông tin cơ bản -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-info-circle"></i> Thông tin cơ bản</h4>
+                            
+                            <div class="form-group">
+                                <label for="tenSanPham">Tên sản phẩm *</label>
+                                <input type="text" id="tenSanPham" name="tenSanPham" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="slug">Slug URL</label>
+                                <input type="text" id="slug" name="slug" placeholder="tu-dong-tao-tu-ten-san-pham">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="moTa">Mô tả sản phẩm</label>
+                                <textarea id="moTa" name="moTa" rows="4" placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="danhMuc">Danh mục</label>
+                                <select id="danhMuc" name="danhMuc">
+                                    <option value="">Chọn danh mục</option>
+                                    <option value="chau-cay">Chậu cây</option>
+                                    <option value="binh-hoa">Bình hoa</option>
+                                    <option value="trang-tri">Trang trí</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Hình ảnh -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-images"></i> Hình ảnh sản phẩm</h4>
+                            
+                            <div class="image-upload-grid">
+                                <div class="image-upload-item">
+                                    <label for="hinhAnhHienThi">Hình chính *</label>
+                                    <div class="image-upload-box" onclick="document.getElementById('hinhAnhHienThi').click()">
+                                        <i class="fas fa-camera"></i>
+                                        <span>Chọn hình chính</span>
+                                    </div>
+                                    <input type="file" id="hinhAnhHienThi" name="hinhAnhHienThi" accept="image/*" style="display: none;" onchange="previewImage(this, 0)">
+                                    <div class="image-preview" id="preview0"></div>
+                                </div>
+                                
+                                <div class="image-upload-item">
+                                    <label for="hinhAnh2">Hình 2</label>
+                                    <div class="image-upload-box" onclick="document.getElementById('hinhAnh2').click()">
+                                        <i class="fas fa-camera"></i>
+                                        <span>Chọn hình 2</span>
+                                    </div>
+                                    <input type="file" id="hinhAnh2" name="hinhAnh2" accept="image/*" style="display: none;" onchange="previewImage(this, 1)">
+                                    <div class="image-preview" id="preview1"></div>
+                                </div>
+                                
+                                <div class="image-upload-item">
+                                    <label for="hinhAnh3">Hình 3</label>
+                                    <div class="image-upload-box" onclick="document.getElementById('hinhAnh3').click()">
+                                        <i class="fas fa-camera"></i>
+                                        <span>Chọn hình 3</span>
+                                    </div>
+                                    <input type="file" id="hinhAnh3" name="hinhAnh3" accept="image/*" style="display: none;" onchange="previewImage(this, 2)">
+                                    <div class="image-preview" id="preview2"></div>
+                                </div>
+                                
+                                <div class="image-upload-item">
+                                    <label for="hinhAnh4">Hình 4</label>
+                                    <div class="image-upload-box" onclick="document.getElementById('hinhAnh4').click()">
+                                        <i class="fas fa-camera"></i>
+                                        <span>Chọn hình 4</span>
+                                    </div>
+                                    <input type="file" id="hinhAnh4" name="hinhAnh4" accept="image/*" style="display: none;" onchange="previewImage(this, 3)">
+                                    <div class="image-preview" id="preview3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chi tiết kích thước -->
+                    <div class="form-section full-width">
+                        <div class="section-header">
+                            <h4><i class="fas fa-rulers"></i> Chi tiết kích thước & giá</h4>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="addSizeDetail()">
+                                <i class="fas fa-plus"></i> Thêm size
+                            </button>
+                        </div>
+                        
+                        <div id="sizeDetailsContainer">
+                            <div class="size-detail-item">
+                                <div class="size-detail-header">
+                                    <h5>Size 1</h5>
+                                    <button type="button" class="btn-icon btn-delete" onclick="removeSizeDetail(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                <div class="size-detail-form">
+                                    <div class="form-group">
+                                        <label>Kích thước</label>
+                                        <input type="text" name="kichThuoc[]" placeholder="S, M, L hoặc 20cm">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Chiều cao (cm)</label>
+                                        <input type="number" name="chieuCao[]" placeholder="20" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Chiều rộng (cm)</label>
+                                        <input type="number" name="chieuRong[]" placeholder="15" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Giá tiền (VNĐ)</label>
+                                        <input type="number" name="giaTien[]" placeholder="500000" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Số lượng trong kho</label>
+                                        <input type="number" name="soLuongTrongKho[]" placeholder="10" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu sản phẩm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h3>Xác nhận xóa</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p>Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
+                <p class="text-danger">Hành động này không thể hoàn tác.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Hủy</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/admin/product-management.js}"></script>
+</body>
+</html>
