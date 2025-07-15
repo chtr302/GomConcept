@@ -32,9 +32,7 @@ build/
 .vscode/
 
 ### Environment variables & Local configs ###
-.env
-application-local.properties
-Procfile
+run.sh
 
 ### Logs ###
 *.log
